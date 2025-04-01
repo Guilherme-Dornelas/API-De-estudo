@@ -5,37 +5,53 @@ namespace App\Routers;
 use App\Controllers\CarController;
 use App\Services\CarService;
 use App\Repositories\CarRepository;
-use App\Models\Car;
+use App\Models\CarModel;
 
-$router = new Router();
+class Routes
+{
+    private $router;
 
-// Inicializa as dependências
-$carRepository = new CarRepository(new Car());
-$carService = new CarService($carRepository);
-$carController = new CarController($carService);
+    public function __construct(RouterConfig $router)
+    {
+        $this->router = $router;
+        $this->registerRoutes();
+    }
 
-// Rota raiz
-$router->get('/', function() {
-    return json_encode(['message' => 'API de Carros']);
-});
+    /**
+     * Registra todas as rotas da aplicação.
+     */
+    private function registerRoutes(): void
+    {
+        $carController = $this->initializeCarController();
 
-// Rotas de carros
-$router->get('cars', function() use ($carController) {
-    return $carController->index();
-});
+     
+        $this->router->get('/', fn() => $this->rootResponse());
 
-$router->get('cars/{id}', function($id) use ($carController) {
-    return $carController->show($id);
-});
+        $this->router->get('cars', fn() => $carController->index());
+        $this->router->get('cars/{id}', fn($id) => $carController->show($id));
+        $this->router->post('cars', fn() => $carController->store());
+        $this->router->put('cars/{id}', fn($id) => $carController->update($id));
+        $this->router->delete('cars/{id}', fn($id) => $carController->destroy($id));
+    }
 
-$router->post('cars', function() use ($carController) {
-    return $carController->store();
-});
+    /**
+     * Inicializa o CarController com suas dependências.
+     */
+    private function initializeCarController(): CarController
+    {
+        $carRepository = new CarRepository(new CarModel());
+        $carService = new CarService($carRepository);
+        return new CarController($carService);
+    }
 
-$router->put('cars/{id}', function($id) use ($carController) {
-    return $carController->update($id);
-});
+    /**
+     * Retorna a resposta para a rota raiz.
+     */
+    private function rootResponse(): string
+    {
+        return json_encode(['message' => 'API de Carros']);
+    }
+}
 
-$router->delete('cars/{id}', function($id) use ($carController) {
-    return $carController->destroy($id);
-}); 
+$router = new RouterConfig();
+new Routes($router);

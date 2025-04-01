@@ -2,7 +2,7 @@
 
 namespace App\Routers;
 
-class Router
+class RouterConfig
 {
     private array $routes = [];
 

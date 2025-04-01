@@ -2,13 +2,13 @@
 
 namespace App\Repositories;
 
-use App\Models\Car;
+use App\Models\CarModel;
 
 class CarRepository
 {
     private $model;
 
-    public function __construct(Car $model)
+    public function __construct(CarModel $model)
     {
         $this->model = $model;
     }
